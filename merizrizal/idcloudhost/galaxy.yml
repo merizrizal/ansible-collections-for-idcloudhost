@@ -7,7 +7,7 @@ readme: README.md
 authors:
 - Mei Rizal <merizrizal@gmail.com>
 
-description: Automation for IDCloudHost setup and deploymentkey is mutually exclusive with 'license_file'
+description: Automation for IDCloudHost setup and deployment
 license:
 - GPL-3.0-or-later
 
