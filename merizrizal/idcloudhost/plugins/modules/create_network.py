@@ -25,7 +25,7 @@ options:
         type: str
     name:
         description: Name of network that will be created
-        required: false
+        required: true
         type: str
 
 author:
