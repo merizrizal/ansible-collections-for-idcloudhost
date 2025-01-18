@@ -1,0 +1,15 @@
+---
+# SPDX-License-Identifier: GPL-3.0-or-later
+namespace: merizrizal
+name: idcloudhost
+version: 1.0.0
+readme: README.md
+authors:
+- Mei Rizal <merizrizal@gmail.com>
+
+description: Automation for IDCloudHost setup and deploymentkey is mutually exclusive with 'license_file'
+license:
+- GPL-3.0-or-later
+
+repository: https://github.com/merizrizal/ansible-collections-for-idcloudhost
+build_ignore: []

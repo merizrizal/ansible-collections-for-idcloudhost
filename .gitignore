@@ -1,0 +1,17 @@
+# Build results
+[Ll]og/
+[Ll]ogs/
+
+node_modules/
+
+# Compiled files
+__pycache__/
+*.py[cod]
+
+# Dist files
+*.tar.gz
+
+.vscode/settings.json
+.vscode/.pyenv
+
+venv/
