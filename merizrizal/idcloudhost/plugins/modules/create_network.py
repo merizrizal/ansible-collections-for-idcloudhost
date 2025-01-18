@@ -5,7 +5,6 @@
 
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
@@ -32,7 +31,6 @@ author:
     - Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
 '''
 
-
 EXAMPLES = r'''
 - name: Create new VPC network
   merizrizal.idcloudhost.create_network:
@@ -58,7 +56,6 @@ is_default:
     type: bool
     returned: always
 '''
-
 
 import requests
 from ansible.module_utils.basic import AnsibleModule
@@ -103,4 +100,3 @@ class CreateNetWork():
 
 if __name__ == '__main__':
     CreateNetWork().main()
-
