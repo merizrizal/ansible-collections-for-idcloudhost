@@ -200,7 +200,7 @@ class CreateVM():
         response = requests.request('POST', url, headers=url_headers, data=form_data, timeout=360)
         data = response.json()
 
-        if data:
+        if 'uuid' not in data:
             result = dict(
                 error=data
             )
