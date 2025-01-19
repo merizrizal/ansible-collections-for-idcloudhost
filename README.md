@@ -35,3 +35,28 @@ Example for creating network resource.
         location: jkt02
 ```
 To see the module documention, run `ansible-doc merizrizal.idcloudhost.create_network`
+
+Example for creating a new VM.
+```
+---
+- name: Get network resource
+  merizrizal.idcloudhost.get_network:
+    api_key: "{{ your_api_key }}"
+    location: jkt02
+  register: get_network_result
+
+- name: Create VM
+  merizrizal.idcloudhost.create_vm:
+    api_key: "{{ your_api_key }}"
+    location: jkt02
+    network_uuid: "{{ get_network_result.uuid }}"
+    name: vm_created_by_ansible
+    os_name: ubuntu
+    os_version: 24.04-lts
+    disks: 20
+    vcpu: 2
+    ram: 2048
+    username: admin
+    password: My4adminpass
+```
+To see the module documention, run `ansible-doc merizrizal.idcloudhost.get_network` and `ansible-doc merizrizal.idcloudhost.create_vm`

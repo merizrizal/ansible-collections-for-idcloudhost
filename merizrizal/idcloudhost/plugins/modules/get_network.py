@@ -11,23 +11,19 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: create_network
-short_description: Create new VPC network
+module: get_network
+short_description: Get existing VPC network
 version_added: "1.0.0"
 
-description: Create an VPC network into selected location to be used by VM resources
+description: Get a default VPC network resource from selected location
 
 options:
     api_key:
         description: API of idcloudhost.com uses tokens to allow access to the API.
         required: true
         type: str
-    name:
-        description: Name of network that will be created.
-        required: true
-        type: str
     location:
-        description: The location name of the network to which this network will be assigned.
+        description: The location name where the network will be selected.
         required: true
         type: str
         choices: [ jkt01, jkt02, jkt03, sgp01 ]
@@ -37,29 +33,24 @@ author:
 '''
 
 EXAMPLES = r'''
-- name: Create new VPC network
-  merizrizal.idcloudhost.create_network:
+- name: Get VPC network
+  merizrizal.idcloudhost.get_network:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
-    name: my_vpc_network_01
     location: jkt01
 '''
 
 RETURN = r'''
 uuid:
-    description: UUID of the created network.
+    description: UUID of the network.
     type: str
     returned: always
 name:
-    description: Name of the created network.
+    description: Name of the network.
     type: str
     returned: always
 subnet:
-    description: Subnet of the created network.
+    description: Subnet of the network.
     type: str
-    returned: always
-is_default:
-    description: Show if the created network set as default or not.
-    type: bool
     returned: always
 '''
 
@@ -67,18 +58,16 @@ import requests
 from ansible.module_utils.basic import AnsibleModule
 
 
-class CreateNetwork():
+class GetNetwork():
     def __init__(self):
         self.base_url = 'https://api.idcloudhost.com/v1'
-        self.endpoint_url = 'network/network'
+        self.endpoint_url = 'network/networks'
         self.api_key = ''
-        self.name = ''
         self.location = ''
 
     def main(self):
         argument_spec = dict(
             api_key=dict(type='str', required=True),
-            name=dict(type='str', required=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01'])
         )
 
@@ -87,34 +76,34 @@ class CreateNetwork():
             supports_check_mode=True,
         )
 
-        self.name = module.params['name']
         self.api_key = module.params['api_key']
         self.location = module.params['location']
 
-        url = f'{self.base_url}/{self.location}/{self.endpoint_url}?name={self.name}'
+        url = f'{self.base_url}/{self.location}/{self.endpoint_url}'
         url_headers = dict(
             apikey=self.api_key
         )
 
-        response = requests.request('POST', url, headers=url_headers, timeout=360)
+        response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
 
-        if 'uuid' not in data:
+        if type(data) is not list or (type(data) is list and len(data) <= 0):
             result = dict(
                 error=data
             )
 
-            module.fail_json(msg='Create network fail', **result)
+            module.fail_json(msg='Get network fail', **result)
         else:
-            result = dict(
-                uuid=data['uuid'],
-                name=data['name'],
-                subnet=data['subnet'],
-                is_default=data['is_default'],
-            )
+            for value in data:
+                if value['is_default']:
+                    result = dict(
+                        uuid=value['uuid'],
+                        name=value['name'],
+                        subnet=value['subnet']
+                    )
 
-            module.exit_json(**result)
+                    module.exit_json(**result)
 
 
 if __name__ == '__main__':
-    CreateNetwork().main()
+    GetNetwork().main()
