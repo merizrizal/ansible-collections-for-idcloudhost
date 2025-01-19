@@ -88,14 +88,22 @@ class CreateNetWork():
 
         response = requests.request('POST', url, headers=url_headers, timeout=60)
         data = response.json()
-        result = dict(
-            uuid=data['uuid'],
-            name=data['name'],
-            subnet=data['subnet'],
-            is_default=data['is_default'],
-        )
 
-        module.exit_json(**result)
+        if 'uuid' not in data:
+            result = dict(
+                error=data['message']
+            )
+
+            module.fail_json(msg='Create network fail', **result)
+        else:
+            result = dict(
+                uuid=data['uuid'],
+                name=data['name'],
+                subnet=data['subnet'],
+                is_default=data['is_default'],
+            )
+
+            module.exit_json(**result)
 
 
 if __name__ == '__main__':
