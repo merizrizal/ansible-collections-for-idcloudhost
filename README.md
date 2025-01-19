@@ -32,5 +32,6 @@ Example for creating network resource.
       merizrizal.idcloudhost.create_network:
         api_key: "{{ your_api_key }}"
         name: "{{ your_desired_network_name }}"
+        location: jkt02
 ```
 To see the module documention, run `ansible-doc merizrizal.idcloudhost.create_network`

@@ -23,9 +23,14 @@ options:
         required: true
         type: str
     name:
-        description: Name of network that will be created
+        description: Name of network that will be created.
         required: true
         type: str
+    location:
+        description: The location name of the network to which this network will be assigned.
+        required: true
+        type: str
+        choices: [ jkt01, jkt02, jkt03, sgp01 ]
 
 author:
     - Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
@@ -36,6 +41,7 @@ EXAMPLES = r'''
   merizrizal.idcloudhost.create_network:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     name: my_vpc_network_01
+    location: jkt01
 '''
 
 RETURN = r'''
@@ -63,14 +69,17 @@ from ansible.module_utils.basic import AnsibleModule
 
 class CreateNetWork():
     def __init__(self):
-        self.base_url = 'https://api.idcloudhost.com/v1/network/network'
-        self.name = ''
+        self.base_url = 'https://api.idcloudhost.com/v1/'
+        self.endpoint_url = 'network/network'
         self.api_key = ''
+        self.name = ''
+        self.location = ''
 
     def main(self):
         argument_spec = dict(
             api_key=dict(type='str', required=True),
-            name=dict(type='str', required=True)
+            name=dict(type='str', required=True),
+            location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01'])
         )
 
         module = AnsibleModule(
@@ -80,8 +89,9 @@ class CreateNetWork():
 
         self.name = module.params['name']
         self.api_key = module.params['api_key']
+        self.location = module.params['location']
 
-        url = f'{self.base_url}?name={self.name}'
+        url = f'{self.base_url}/{self.location}/{self.endpoint_url}?name={self.name}'
         url_headers = dict(
             apikey=self.api_key
         )
