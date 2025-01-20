@@ -105,9 +105,21 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
-success:
-    description: Task is successfully executed.
-    type: bool
+uuid:
+    description: UUID of the created VM.
+    type: str
+    returned: always
+hostname:
+    description: Machine hostname.
+    type: str
+    returned: always
+private_ipv4:
+    description: Private IPv4 of the created VM.
+    type: str
+    returned: always
+billing_account:
+    description: What billing account that will be paid for the created VM.
+    type: str
     returned: always
 '''
 
@@ -208,7 +220,10 @@ class CreateVM():
             module.fail_json(msg='Create VM fail', **data)
         else:
             result = dict(
-                success=True
+                uuid=data['uuid'],
+                hostname=data['hostname'],
+                private_ipv4=data['private_ipv4'],
+                billing_account=data['billing_account'],
             )
 
             module.exit_json(**result)
