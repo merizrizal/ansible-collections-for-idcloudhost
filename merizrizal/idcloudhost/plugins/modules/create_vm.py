@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025, Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
+# Copyright (c) 2025, Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
 
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -85,7 +85,7 @@ options:
         type: str
 
 author:
-    - Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
+    - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
 '''
 
 EXAMPLES = r'''
@@ -93,7 +93,7 @@ EXAMPLES = r'''
   merizrizal.idcloudhost.create_network:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     location: jkt01
-    network_uuid: "{{ get_from_get_network.uuid }}
+    network_uuid: "{{ get_from_get_network.uuid }}"
     name: my_ubuntu_vm01
     os_name: ubuntu
     os_version: 24.04-lts
@@ -136,23 +136,22 @@ class CreateVM():
 
     def main(self):
         os_version_choices = dict(
-            almalinux=['9.x','8.x'],
+            almalinux=['9.x', '8.x'],
             bsd=['freebsd_12.2'],
             centos=['9.x'],
-            cloudlinux=['8.4','7.9'],
-            debian=['11','12'],
-            fedora=['32','34','36'],
+            cloudlinux=['8.4', '7.9'],
+            debian=['11', '12'],
+            fedora=['32', '34', '36'],
             opensuse=['15.3'],
             oracle=['9.x'],
-            rhel=['server_7.9','server_8.4'],
-            rocky=['linux_8.4','9.x'],
-            ubuntu=['21.04','22.04-lts','24.04-lts','20.04-lts'],
+            rhel=['server_7.9', 'server_8.4'],
+            rocky=['linux_8.4', '9.x'],
+            ubuntu=['21.04', '22.04-lts', '24.04-lts', '20.04-lts'],
             vzlinux=['8.x'],
             windows=['2019']
         )
 
-        all_os_choices = [ os for os in os_version_choices ]
-
+        all_os_choices = list(os_version_choices)
         all_os_version_choices = []
         for os in os_version_choices:
             all_os_version_choices += os_version_choices[os]

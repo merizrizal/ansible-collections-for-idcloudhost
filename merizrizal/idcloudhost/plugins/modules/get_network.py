@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025, Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
+# Copyright (c) 2025, Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
 
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
@@ -29,7 +29,7 @@ options:
         choices: [ jkt01, jkt02, jkt03, sgp01 ]
 
 author:
-    - Mei Rizal (merizrizal) <meriz.rizal@gmail.com>
+    - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
 '''
 
 EXAMPLES = r'''
@@ -87,7 +87,7 @@ class GetNetwork():
         response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
 
-        if type(data) is not list or (type(data) is list and len(data) <= 0):
+        if not isinstance(data, list) or (isinstance(data, list) and len(data) <= 0):
             result = dict(
                 error=data
             )
