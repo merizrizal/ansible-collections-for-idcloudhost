@@ -48,19 +48,19 @@ RETURN = r'''
 uuid:
     description: UUID of the created network.
     type: str
-    returned: always
+    returned: success
 name:
     description: Name of the created network.
     type: str
-    returned: always
+    returned: success
 subnet:
     description: Subnet of the created network.
     type: str
-    returned: always
+    returned: success
 is_default:
     description: Show if the created network set as default or not.
     type: bool
-    returned: always
+    returned: success
 '''
 
 import requests

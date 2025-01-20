@@ -36,27 +36,46 @@ Example for creating network resource.
 ```
 To see the module documention, run `ansible-doc merizrizal.idcloudhost.create_network`
 
-Example for creating a new VM.
+Example for creating a new VM and get its publid IP address.
 ```
 ---
-- name: Get network resource
-  merizrizal.idcloudhost.get_network:
-    api_key: "{{ your_api_key }}"
-    location: jkt02
-  register: get_network_result
+- name: ID Cloud Host Setup
+  hosts: idch
+  tasks:
+    - name: Get network resource
+      merizrizal.idcloudhost.get_network:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+      register: get_network_result
 
-- name: Create VM
-  merizrizal.idcloudhost.create_vm:
-    api_key: "{{ your_api_key }}"
-    location: jkt02
-    network_uuid: "{{ get_network_result.uuid }}"
-    name: vm_created_by_ansible
-    os_name: ubuntu
-    os_version: 24.04-lts
-    disks: 20
-    vcpu: 2
-    ram: 2048
-    username: admin
-    password: My4adminpass
+    - name: Create VM
+      merizrizal.idcloudhost.create_vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        network_uuid: "{{ get_network_result.uuid }}"
+        name: vm_created_by_ansible
+        os_name: ubuntu
+        os_version: 24.04-lts
+        disks: 20
+        vcpu: 2
+        ram: 2048
+        username: admin
+        password: My4adminpass
+      register: create_vm_result
+
+    - name: Get public IPv4 address from selected private_ipv4
+      merizrizal.idcloudhost.get_public_ip:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        private_ipv4: "{{ create_vm_result.private_ipv4 }}
+
+    - name: Get public IPv4 address from selected vm_uuid
+      merizrizal.idcloudhost.get_public_ip:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        vm_uuid: "{{ create_vm_result.uuid }}
 ```
-To see the module documention, run `ansible-doc merizrizal.idcloudhost.get_network` and `ansible-doc merizrizal.idcloudhost.create_vm`
+To see the module documention, run:
+- `ansible-doc merizrizal.idcloudhost.get_network`
+- `ansible-doc merizrizal.idcloudhost.create_vm`
+- `ansible-doc merizrizal.idcloudhost.get_public_ip`

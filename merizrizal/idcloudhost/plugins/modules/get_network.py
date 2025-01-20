@@ -43,15 +43,15 @@ RETURN = r'''
 uuid:
     description: UUID of the network.
     type: str
-    returned: always
+    returned: success
 name:
     description: Name of the network.
     type: str
-    returned: always
+    returned: success
 subnet:
     description: Subnet of the network.
     type: str
-    returned: always
+    returned: success
 '''
 
 import requests

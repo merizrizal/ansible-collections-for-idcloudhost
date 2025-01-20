@@ -108,19 +108,19 @@ RETURN = r'''
 uuid:
     description: UUID of the created VM.
     type: str
-    returned: always
+    returned: success
 hostname:
     description: Machine hostname.
     type: str
-    returned: always
+    returned: success
 private_ipv4:
     description: Private IPv4 of the created VM.
     type: str
-    returned: always
+    returned: success
 billing_account:
-    description: What billing account that will be paid for the created VM.
+    description: The selected billing account that will be paying for the created VM.
     type: str
-    returned: always
+    returned: success
 '''
 
 import requests
