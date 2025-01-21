@@ -63,8 +63,11 @@ is_default:
     returned: success
 '''
 
-import requests
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_packages import \
+    ensure_requests
+
+requests = None
 
 
 class CreateNetwork():
@@ -77,7 +80,7 @@ class CreateNetwork():
 
     def main(self):
         argument_spec = dict(
-            api_key=dict(type='str', required=True),
+            api_key=dict(type='str', required=True, no_log=True),
             name=dict(type='str', required=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01'])
         )
@@ -86,6 +89,8 @@ class CreateNetwork():
             argument_spec=argument_spec,
             supports_check_mode=True,
         )
+
+        requests = ensure_requests(module)
 
         self.name = module.params['name']
         self.api_key = module.params['api_key']
