@@ -152,10 +152,15 @@ class Network():
                 )
 
                 response = requests.request('DELETE', url, headers=url_headers, timeout=360)
-                data = response.json()
 
                 if response.status_code == 200:
                     network.update(changed=True)
+                else:
+                    result = dict(
+                        error='Something is wrong with the request.'
+                    )
+
+                    module.fail_json(msg='Delete network fail', **result)
             else:
                 network.update(changed=False)
 
