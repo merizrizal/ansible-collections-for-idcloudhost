@@ -58,7 +58,8 @@ options:
             - If windows [ 2019 ]
         required: true
         type: str
-        choices: [ ... ]
+        choices: [ '8.x', '8.4', '9.x', '32', '24.04-lts', 'linux_8.4', 'server_7.9', '11', '2019', '34', '7.9',
+            'freebsd_12.2', '15.3', 'server_8.4', '12', '21.04', '36', '22.04-lts', '20.04-lts' ]
     disks:
         description: Size of main storage in GB.
         required: true
@@ -123,8 +124,11 @@ billing_account:
     returned: success
 '''
 
-import requests
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_packages import \
+    ensure_requests
+
+requests = None
 
 
 class CreateVM():
@@ -159,7 +163,7 @@ class CreateVM():
         all_os_version_choices = list(set(all_os_version_choices))
 
         argument_spec = dict(
-            api_key=dict(type='str', required=True),
+            api_key=dict(type='str', required=True, no_log=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
             network_uuid=dict(type='str', required=True),
             name=dict(type='str', required=True),
@@ -176,6 +180,8 @@ class CreateVM():
             argument_spec=argument_spec,
             supports_check_mode=True,
         )
+
+        requests = ensure_requests(module)
 
         self.api_key = module.params['api_key']
         self.location = module.params['location']

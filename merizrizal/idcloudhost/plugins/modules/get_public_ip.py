@@ -77,8 +77,11 @@ assigned_to_private_ip:
     returned: success, when vm_uuid is selected
 '''
 
-import requests
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_packages import \
+    ensure_requests
+
+requests = None
 
 
 class GetPublicIP():
@@ -92,7 +95,7 @@ class GetPublicIP():
 
     def main(self):
         argument_spec = dict(
-            api_key=dict(type='str', required=True),
+            api_key=dict(type='str', required=True, no_log=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
             private_ipv4=dict(type='str', required=False),
             vm_uuid=dict(type='str', required=False)
@@ -108,6 +111,8 @@ class GetPublicIP():
                 ('private_ipv4', 'vm_uuid'),
             ]
         )
+
+        requests = ensure_requests(module)
 
         self.api_key = module.params['api_key']
         self.location = module.params['location']

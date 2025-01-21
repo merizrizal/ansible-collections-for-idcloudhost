@@ -1,0 +1,10 @@
+#!/bin/bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+BASE_DIR=$SCRIPT_DIR/../..
+
+cd ${BASE_DIR}
+make ansible-sanity-test-lint
+if [[ $? -gt 0 ]]; then
+    echo "We have sanity test failed. Commit is aborted. Please fix it first"
+    exit 1
+fi
