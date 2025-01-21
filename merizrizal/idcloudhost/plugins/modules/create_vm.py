@@ -163,7 +163,7 @@ class CreateVM():
         all_os_version_choices = list(set(all_os_version_choices))
 
         argument_spec = dict(
-            api_key=dict(type='str', required=True),
+            api_key=dict(type='str', required=True, no_log=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
             network_uuid=dict(type='str', required=True),
             name=dict(type='str', required=True),
@@ -173,7 +173,7 @@ class CreateVM():
             vcpu=dict(type='int', required=True),
             ram=dict(type='int', required=True),
             username=dict(type='str', required=True),
-            password=dict(type='str', required=True)
+            password=dict(type='str', required=True, no_log=True)
         )
 
         module = AnsibleModule(
