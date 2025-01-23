@@ -22,6 +22,63 @@ target:
 
 Then write the playbook.yml file.
 
+Example of using the Network module.
+```
+---
+- name: ID Cloud Host Setup
+  hosts: idch
+  tasks:
+    - name: Create network VPC resource
+      merizrizal.idcloudhost.network:
+        api_key: "{{ your_api_key }}"
+        name: "{{ your_desired_network_name }}"
+        location: jkt02
+        # Since the default value of state is set to present, we may exclude it
+        state: present
+
+    - name: Delete network VPC resource
+      merizrizal.idcloudhost.network:
+        api_key: "{{ your_api_key }}"
+        name: "{{ your_desired_network_name }}"
+        location: jkt02
+        state: absent
+```
+To see the module documentation, run `ansible-doc merizrizal.idcloudhost.network`
+
+Example of using the VM module.
+```
+---
+- name: ID Cloud Host Setup
+  hosts: idch
+  tasks:
+    - name: Create VM resource
+      merizrizal.idcloudhost.vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        network_name: "{{ your_desired_network_name }}"
+        name: "{{ your_desired_vm_name }}"
+        os_name: ubuntu
+        os_version: 24.04-lts
+        disks: 20
+        vcpu: 2
+        ram: 2048
+        username: admin
+        password: My4adminpass
+        # Since the default value of state is set to present, we may exclude it
+        state: present
+
+    - name: Delete VM resource
+      merizrizal.idcloudhost.vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        name: "{{ your_desired_vm_name }}"
+        remove_public_ipv4: false
+        state: absent
+```
+To see the module documentation, run `ansible-doc merizrizal.idcloudhost.create_network`
+
+### _The initial modules below will be removed later_
+
 Example for creating network resource.
 ```
 ---
@@ -34,7 +91,7 @@ Example for creating network resource.
         name: "{{ your_desired_network_name }}"
         location: jkt02
 ```
-To see the module documention, run `ansible-doc merizrizal.idcloudhost.create_network`
+To see the module documentation, run `ansible-doc merizrizal.idcloudhost.create_network`
 
 Example for creating a new VM and get its publid IP address.
 ```
@@ -75,7 +132,7 @@ Example for creating a new VM and get its publid IP address.
         location: jkt02
         vm_uuid: "{{ create_vm_result.uuid }}
 ```
-To see the module documention, run:
+To see the module documentation, run:
 - `ansible-doc merizrizal.idcloudhost.get_network`
 - `ansible-doc merizrizal.idcloudhost.create_vm`
 - `ansible-doc merizrizal.idcloudhost.get_public_ip`

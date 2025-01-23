@@ -57,3 +57,30 @@ class Base(object):
                     return network
 
         return dict()
+
+    def _get_public_ipv4(self, vm_uuid=None, private_ipv4=None) -> dict:
+        url = f'{self._base_url}/{self._location}/network/ip_addresses'
+        url_headers = dict(
+            apikey=self._api_key
+        )
+
+        global requests
+        requests = self._ensure_requests()
+        response = requests.request('GET', url, headers=url_headers, timeout=360)
+        data = response.json()
+
+        if isinstance(data, list) and len(data) > 0:
+            for value in data:
+                is_found = value['assigned_to_private_ip'] == private_ipv4
+                is_found = is_found or value['assigned_to'] == vm_uuid
+
+                if is_found:
+                    result = dict(
+                        uuid=value['uuid'],
+                        public_ipv4=value['address'],
+                        enabled=value['enabled']
+                    )
+
+                    return result
+
+            return dict()

@@ -50,6 +50,8 @@ EXAMPLES = r'''
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     name: my_vpc_network_01
     location: jkt01
+    # Since the default value of state is set to present, we may exclude it
+    state: present
 
 - name: Remove new VPC network
   merizrizal.idcloudhost.network:
@@ -153,7 +155,7 @@ class Network(Base):
                     network.update(changed=True)
                 else:
                     result = dict(
-                        error='Something is wrong with the request.'
+                        error='There was a problem with the request.'
                     )
 
                     module.fail_json(msg='Delete network fail', **result)

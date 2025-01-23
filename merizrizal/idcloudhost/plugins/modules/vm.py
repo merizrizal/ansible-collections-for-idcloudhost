@@ -89,6 +89,12 @@ options:
             - Minimum length is 8 characters.
             - This is required if state is set to present.
         type: str
+    remove_public_ipv4:
+        description:
+            - Flag to remove public IPv4 address.
+            - This is required if state is set to absent.
+        default: null
+        type: bool
     state:
         description:
             - Indicates the desired VM state.
@@ -116,6 +122,7 @@ EXAMPLES = r'''
     ram: 2048
     username: my_admin_user
     password: My4adminpass
+    # Since the default value of state is set to present, we can exclude it
     state: present
 
 - name: Delete VM
@@ -123,6 +130,7 @@ EXAMPLES = r'''
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     location: jkt01
     name: my_ubuntu_vm01
+    remove_public_ipv4: true
     state: absent
 '''
 
@@ -141,6 +149,10 @@ hostname:
     returned: success
 private_ipv4:
     description: Private IPv4 of the created VM.
+    type: str
+    returned: success
+public_ipv4:
+    description: Public IPv4 of the created VM.
     type: str
     returned: success
 billing_account:
@@ -200,6 +212,7 @@ class Vm(Base):
             ram=dict(type='int'),
             username=dict(type='str'),
             password=dict(type='str', no_log=True),
+            remove_public_ipv4=dict(type='bool', default=None),
             state=dict(type='str', default='present', choices=['absent', 'present'])
         )
 
@@ -209,7 +222,8 @@ class Vm(Base):
             required_if=[
                 ('state', 'present', (
                     'network_name', 'os_name', 'os_version',
-                    'disks', 'vcpu', 'ram', 'username', 'password'))
+                    'disks', 'vcpu', 'ram', 'username', 'password')),
+                ('state', 'absent', ('remove_public_ipv4',))
             ]
         )
 
@@ -222,19 +236,21 @@ class Vm(Base):
         if self._state == 'present':
             if 'uuid' in vm:
                 vm.update(changed=False)
-                self._module.exit_json(**vm)
             else:
                 network = self._get_network()
                 self._create_vm(os_version_choices, network)
         elif self._state == 'absent':
             if 'uuid' in vm:
                 vm = self._delete_vm(vm)
-                self._module.exit_json(**vm)
+
+                if self._module.params['remove_public_ipv4']:
+                    self._delete_public_ipv4(vm['public_ipv4'])
             else:
                 vm.update(changed=False)
-                self._module.exit_json(**vm)
 
-    def _get_vm(self):
+        self._module.exit_json(**vm)
+
+    def _get_vm(self) -> dict:
         url = f'{self._base_url}/{self._location}/user-resource/vm/list'
         url_headers = dict(
             apikey=self._api_key
@@ -246,19 +262,27 @@ class Vm(Base):
         if isinstance(data, list) and len(data) > 0:
             for value in data:
                 if value['name'] == self._name:
-                    vm = dict(
-                        uuid=value['uuid'],
-                        name=value['name'],
-                        hostname=value['hostname'],
-                        private_ipv4=value['private_ipv4'],
-                        billing_account=value['billing_account'],
-                    )
-
-                    return vm
+                    return self._construct_vm_data(value)
 
         return dict()
 
-    def _get_network(self):
+    def _construct_vm_data(self, data) -> dict:
+        floating_ip = self._get_public_ipv4(data['uuid'], data['private_ipv4'])
+        public_ipv4 = '' if 'public_ipv4' not in floating_ip else floating_ip['public_ipv4']
+
+        vm = dict(
+            uuid=data['uuid'],
+            name=data['name'],
+            hostname=data['hostname'],
+            private_ipv4=data['private_ipv4'],
+            public_ipv4=public_ipv4,
+            billing_account=data['billing_account'],
+            changed=True
+        )
+
+        return vm
+
+    def _get_network(self) -> dict:
         network = self._get_existing_network(self._module.params['network_name'])
 
         if 'uuid' not in network:
@@ -309,18 +333,11 @@ class Vm(Base):
 
             self._module.fail_json(msg='Create VM fail', **data)
         else:
-            result = dict(
-                uuid=data['uuid'],
-                name=data['name'],
-                hostname=data['hostname'],
-                private_ipv4=data['private_ipv4'],
-                billing_account=data['billing_account'],
-                changed=True
-            )
+            result = self._construct_vm_data(data)
 
             self._module.exit_json(**result)
 
-    def _delete_vm(self, vm):
+    def _delete_vm(self, vm) -> dict:
         if 'uuid' in vm:
             url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
             url_headers = dict(
@@ -337,7 +354,7 @@ class Vm(Base):
                 vm.update(changed=True)
             else:
                 result = dict(
-                    error='Something is wrong with the request.'
+                    error='There was a problem with the request.'
                 )
 
                 self._module.fail_json(msg='Delete VM fail', **result)
@@ -345,6 +362,21 @@ class Vm(Base):
             vm.update(changed=False)
 
         return vm
+
+    def _delete_public_ipv4(self, public_ipv4):
+        url = f'{self._base_url}/{self._location}/network/ip_addresses/{public_ipv4}'
+        url_headers = dict(
+            apikey=self._api_key
+        )
+
+        response = requests.request('DELETE', url, headers=url_headers, timeout=360)
+
+        if response.status_code != 200:
+            result = dict(
+                error='There was a problem with the request when deleting the public IPv4 address.'
+            )
+
+            self._module.fail_json(msg='Delete VM fail', **result)
 
 
 if __name__ == '__main__':
