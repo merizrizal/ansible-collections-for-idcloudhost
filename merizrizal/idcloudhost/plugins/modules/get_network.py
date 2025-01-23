@@ -97,7 +97,7 @@ class GetNetwork():
                 error=data
             )
 
-            module.fail_json(msg='Get network fail', **result)
+            module.fail_json(msg='Failed to get the VPC network.', **result)
         else:
             for value in data:
                 if value['is_default']:

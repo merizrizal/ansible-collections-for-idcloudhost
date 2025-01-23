@@ -109,7 +109,7 @@ class CreateNetwork():
                 error=data
             )
 
-            module.fail_json(msg='Create network fail', **result)
+            module.fail_json(msg='Failed to create the VPC network.', **result)
         else:
             result = dict(
                 uuid=data['uuid'],

@@ -194,7 +194,7 @@ class CreateVm():
                 error=f'Selected os_name is {os_name} then os_version must be one of {os_version_choices[os_name]}, got {os_version}'
             )
 
-            module.fail_json(msg='Create VM fail', **result)
+            module.fail_json(msg='Failed to create the VM.', **result)
 
         url = f'{self.base_url}/{self.location}/{self.endpoint_url}'
         url_headers = {
@@ -222,7 +222,7 @@ class CreateVm():
                 error=data
             )
 
-            module.fail_json(msg='Create VM fail', **data)
+            module.fail_json(msg='Failed to create the VM.', **data)
         else:
             result = dict(
                 uuid=data['uuid'],

@@ -132,7 +132,7 @@ class GetPublicIP():
                 error=data
             )
 
-            module.fail_json(msg='Get public IPv4 fail', **result)
+            module.fail_json(msg='Failed to get the public IPv4 address.', **result)
         else:
             result = dict(
                 error='Public IPv4 address is not found'
@@ -156,7 +156,7 @@ class GetPublicIP():
 
                     module.exit_json(**result)
 
-            module.fail_json(msg='Get public IPv4 fail', **result)
+            module.fail_json(msg='Failed to get the public IPv4 address', **result)
 
 
 if __name__ == '__main__':
