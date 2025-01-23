@@ -91,7 +91,7 @@ author:
 
 EXAMPLES = r'''
 - name: Create new VM
-  merizrizal.idcloudhost.create_network:
+  merizrizal.idcloudhost.create_vm:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     location: jkt01
     network_uuid: "{{ get_from_get_network.uuid }}"
@@ -131,7 +131,7 @@ from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_pack
 requests = None
 
 
-class CreateVM():
+class CreateVm():
     def __init__(self):
         self.base_url = 'https://api.idcloudhost.com/v1'
         self.endpoint_url = 'user-resource/vm'
@@ -235,4 +235,4 @@ class CreateVM():
 
 
 if __name__ == '__main__':
-    CreateVM().main()
+    CreateVm().main()

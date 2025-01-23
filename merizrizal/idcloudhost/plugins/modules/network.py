@@ -79,27 +79,23 @@ is_default:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_packages import \
-    ensure_requests
+from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.base import \
+    Base
 
 requests = None
 
 
-class Network():
+class Network(Base):
     def __init__(self):
-        self.base_url = 'https://api.idcloudhost.com/v1'
-        self.endpoint_url = 'network/network'
-        self.api_key = ''
-        self.name = ''
-        self.location = ''
-        self.state = 'present'
+        super().__init__()
+        self._endpoint_url = 'network/network'
 
     def main(self):
         argument_spec = dict(
             api_key=dict(type='str', required=True, no_log=True),
             name=dict(type='str', required=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
-            state=dict(type='str', default='present', choices=['absent', 'present']),
+            state=dict(type='str', default='present', choices=['absent', 'present'])
         )
 
         module = AnsibleModule(
@@ -108,22 +104,22 @@ class Network():
         )
 
         global requests
-        requests = ensure_requests(module)
+        requests = self._ensure_requests()
 
-        self.name = module.params['name']
-        self.api_key = module.params['api_key']
-        self.location = module.params['location']
-        self.state = module.params['state']
+        self._name = module.params['name']
+        self._api_key = module.params['api_key']
+        self._location = module.params['location']
+        self._state = module.params['state']
 
-        network = self.get_existing_network_by_name()
+        network = self._get_existing_network(self._name)
 
-        if self.state == 'present':
+        if self._state == 'present':
             if 'uuid' in network:
                 network.update(changed=False)
             else:
-                url = f'{self.base_url}/{self.location}/{self.endpoint_url}?name={self.name}'
+                url = f'{self._base_url}/{self._location}/{self._endpoint_url}?name={self._name}'
                 url_headers = dict(
-                    apikey=self.api_key
+                    apikey=self._api_key
                 )
 
                 response = requests.request('POST', url, headers=url_headers, timeout=360)
@@ -143,12 +139,12 @@ class Network():
                         is_default=data['is_default'],
                         changed=True
                     )
-        elif self.state == 'absent':
+        elif self._state == 'absent':
             if 'uuid' in network:
                 uuid = network['uuid']
-                url = f'{self.base_url}/{self.location}/{self.endpoint_url}/{uuid}'
+                url = f'{self._base_url}/{self._location}/{self._endpoint_url}/{uuid}'
                 url_headers = dict(
-                    apikey=self.api_key
+                    apikey=self._api_key
                 )
 
                 response = requests.request('DELETE', url, headers=url_headers, timeout=360)
@@ -165,29 +161,6 @@ class Network():
                 network.update(changed=False)
 
         module.exit_json(**network)
-
-    def get_existing_network_by_name(self) -> dict:
-        url = f'{self.base_url}/{self.location}/{self.endpoint_url}s'
-        url_headers = dict(
-            apikey=self.api_key
-        )
-
-        response = requests.request('GET', url, headers=url_headers, timeout=360)
-        data = response.json()
-
-        if isinstance(data, list) and len(data) > 0:
-            for value in data:
-                if value['name'] == self.name:
-                    network = dict(
-                        uuid=value['uuid'],
-                        name=value['name'],
-                        subnet=value['subnet'],
-                        is_default=value['is_default']
-                    )
-
-                    return network
-
-        return dict()
 
 
 if __name__ == '__main__':
