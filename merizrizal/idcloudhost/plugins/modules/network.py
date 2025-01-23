@@ -53,7 +53,7 @@ EXAMPLES = r'''
     # Since the default value of state is set to present, we may exclude it
     state: present
 
-- name: Remove new VPC network
+- name: Delete VPC network
   merizrizal.idcloudhost.network:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     name: my_vpc_network_01
@@ -132,7 +132,7 @@ class Network(Base):
                         error=data
                     )
 
-                    module.fail_json(msg='Create network fail', **result)
+                    module.fail_json(msg='Failed to create the VPC network.', **result)
                 else:
                     network = dict(
                         uuid=data['uuid'],
@@ -158,7 +158,7 @@ class Network(Base):
                         error='There was a problem with the request.'
                     )
 
-                    module.fail_json(msg='Delete network fail', **result)
+                    module.fail_json(msg='Failed to delete the VPC network.', **result)
             else:
                 network.update(changed=False)
 

@@ -72,7 +72,7 @@ assigned_to:
     type: bool
     returned: success, when private_ipv4 is selected
 assigned_to_private_ip:
-    description: On which private Ipv4 this public IPv4 is assigned.
+    description: On which private IPv4 address this public IPv4 address is assigned.
     type: bool
     returned: success, when vm_uuid is selected
 '''

@@ -148,11 +148,11 @@ hostname:
     type: str
     returned: success
 private_ipv4:
-    description: Private IPv4 of the created VM.
+    description: Private IPv4 address of the created VM.
     type: str
     returned: success
 public_ipv4:
-    description: Public IPv4 of the created VM.
+    description: Public IPv4 address of the created VM.
     type: str
     returned: success
 billing_account:
@@ -290,7 +290,7 @@ class Vm(Base):
                 error='The selected network is not found.'
             )
 
-            self._module.fail_json(msg='Create VM fail.', **result)
+            self._module.fail_json(msg='Failed to create the VM.', **result)
 
         return network
 
@@ -303,7 +303,7 @@ class Vm(Base):
                 error=f'Selected os_name is {os_name} then os_version must be one of {os_version_choices[os_name]}, got {os_version}'
             )
 
-            self._module.fail_json(msg='Create VM fail', **result)
+            self._module.fail_json(msg='Failed to create the VM.', **result)
 
         url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
         url_headers = {
@@ -331,7 +331,7 @@ class Vm(Base):
                 error=data
             )
 
-            self._module.fail_json(msg='Create VM fail', **data)
+            self._module.fail_json(msg='Failed to create the VM.', **data)
         else:
             result = self._construct_vm_data(data)
 
@@ -357,7 +357,7 @@ class Vm(Base):
                     error='There was a problem with the request.'
                 )
 
-                self._module.fail_json(msg='Delete VM fail', **result)
+                self._module.fail_json(msg='Failed to delete the VM.', **result)
         else:
             vm.update(changed=False)
 
@@ -376,7 +376,7 @@ class Vm(Base):
                 error='There was a problem with the request when deleting the public IPv4 address.'
             )
 
-            self._module.fail_json(msg='Delete VM fail', **result)
+            self._module.fail_json(msg='Failed to delete the VM.', **result)
 
 
 if __name__ == '__main__':

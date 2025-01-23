@@ -115,7 +115,7 @@ hostname:
     type: str
     returned: success
 private_ipv4:
-    description: Private IPv4 of the created VM.
+    description: Private IPv4 address of the created VM.
     type: str
     returned: success
 billing_account:
