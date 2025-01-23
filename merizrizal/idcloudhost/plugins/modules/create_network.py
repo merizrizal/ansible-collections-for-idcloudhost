@@ -22,15 +22,15 @@ options:
         description: API of idcloudhost.com uses tokens to allow access to the API.
         required: true
         type: str
-    name:
-        description: Name of network that will be created.
-        required: true
-        type: str
     location:
         description: The location name of the network to which this network will be assigned.
         required: true
         type: str
         choices: [ jkt01, jkt02, jkt03, sgp01 ]
+    name:
+        description: Name of network that will be created.
+        required: true
+        type: str
 
 author:
     - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
@@ -40,8 +40,8 @@ EXAMPLES = r'''
 - name: Create new VPC network
   merizrizal.idcloudhost.create_network:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
-    name: my_vpc_network_01
     location: jkt01
+    name: my_vpc_network_01
 '''
 
 RETURN = r'''
