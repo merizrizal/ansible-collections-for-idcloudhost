@@ -75,7 +75,7 @@ Example of using the VM module.
         remove_public_ipv4: false
         state: absent
 ```
-To see the module documentation, run `ansible-doc merizrizal.idcloudhost.create_network`
+To see the module documentation, run `ansible-doc merizrizal.idcloudhost.vm`
 
 ### _The initial modules below will be removed later_
 
