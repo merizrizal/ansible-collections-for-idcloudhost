@@ -91,7 +91,7 @@ author:
 
 EXAMPLES = r'''
 - name: Create new VM
-  merizrizal.idcloudhost.create_network:
+  merizrizal.idcloudhost.create_vm:
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     location: jkt01
     network_uuid: "{{ get_from_get_network.uuid }}"
@@ -115,7 +115,7 @@ hostname:
     type: str
     returned: success
 private_ipv4:
-    description: Private IPv4 of the created VM.
+    description: Private IPv4 address of the created VM.
     type: str
     returned: success
 billing_account:
@@ -131,7 +131,7 @@ from ansible_collections.merizrizal.idcloudhost.plugins.module_utils.ensure_pack
 requests = None
 
 
-class CreateVM():
+class CreateVm():
     def __init__(self):
         self.base_url = 'https://api.idcloudhost.com/v1'
         self.endpoint_url = 'user-resource/vm'
@@ -194,7 +194,7 @@ class CreateVM():
                 error=f'Selected os_name is {os_name} then os_version must be one of {os_version_choices[os_name]}, got {os_version}'
             )
 
-            module.fail_json(msg='Create VM fail', **result)
+            module.fail_json(msg='Failed to create the VM.', **result)
 
         url = f'{self.base_url}/{self.location}/{self.endpoint_url}'
         url_headers = {
@@ -222,7 +222,7 @@ class CreateVM():
                 error=data
             )
 
-            module.fail_json(msg='Create VM fail', **data)
+            module.fail_json(msg='Failed to create the VM.', **data)
         else:
             result = dict(
                 uuid=data['uuid'],
@@ -235,4 +235,4 @@ class CreateVM():
 
 
 if __name__ == '__main__':
-    CreateVM().main()
+    CreateVm().main()
