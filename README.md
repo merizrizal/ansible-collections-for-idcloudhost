@@ -33,7 +33,7 @@ Example of using the Network module.
         api_key: "{{ your_api_key }}"
         name: "{{ your_desired_network_name }}"
         location: jkt02
-        # Since the default value of state is set to present, we may exclude it
+        # Since the default value of state is set to present, we may exclude the state below
         state: present
 
     - name: Delete network VPC resource
@@ -64,7 +64,7 @@ Example of using the VM module.
         ram: 2048
         username: admin
         password: My4adminpass
-        # Since the default value of state is set to present, we may exclude it
+        # Since the default value of state is set to present, we may exclude the state below
         state: present
 
     - name: Delete VM resource

@@ -122,7 +122,7 @@ EXAMPLES = r'''
     ram: 2048
     username: my_admin_user
     password: My4adminpass
-    # Since the default value of state is set to present, we can exclude it
+    # Since the default value of state is set to present, we may exclude the state below
     state: present
 
 - name: Delete VM

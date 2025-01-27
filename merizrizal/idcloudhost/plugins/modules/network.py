@@ -50,7 +50,7 @@ EXAMPLES = r'''
     api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
     name: my_vpc_network_01
     location: jkt01
-    # Since the default value of state is set to present, we may exclude it
+    # Since the default value of state is set to present, we may exclude the state below
     state: present
 
 - name: Delete VPC network
