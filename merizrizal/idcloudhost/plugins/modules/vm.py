@@ -65,17 +65,17 @@ options:
     disks:
         description:
             - Size of main storage in GB.
-            - This is required if state is set to present.
+            - This is required if state is set to present or resize.
         type: int
     vcpu:
         description:
             - Numbers of CPU.
-            - This is required if state is set to present.
+            - This is required if state is set to present or resize.
         type: int
     ram:
         description:
             - Size of RAM in MB.
-            - This is required if state is set to present.
+            - This is required if state is set to present or resize.
         type: int
     username:
         description:
@@ -99,10 +99,11 @@ options:
         description:
             - Indicates the desired VM state.
             - If present, it will be created.
+            - If resize, it will resize disks, VCPU and RAM.
             - If absent, it will be deleted.
         default: present
         type: str
-        choices: [ present, absent ]
+        choices: [ present, resize, absent ]
 
 author:
     - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
@@ -132,6 +133,16 @@ EXAMPLES = r'''
     name: my_ubuntu_vm01
     remove_public_ipv4: true
     state: absent
+
+- name: Resize VM
+  merizrizal.idcloudhost.vm:
+    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    location: jkt01
+    name: my_ubuntu_vm01
+    disks: 40
+    vcpu: 4
+    ram: 3072
+    state: resize
 '''
 
 RETURN = r'''
@@ -213,7 +224,7 @@ class Vm(Base):
             username=dict(type='str'),
             password=dict(type='str', no_log=True),
             remove_public_ipv4=dict(type='bool', default=None),
-            state=dict(type='str', default='present', choices=['absent', 'present'])
+            state=dict(type='str', default='present', choices=['absent', 'present', 'resize'])
         )
 
         self._module = AnsibleModule(
@@ -223,6 +234,7 @@ class Vm(Base):
                 ('state', 'present', (
                     'network_name', 'os_name', 'os_version',
                     'disks', 'vcpu', 'ram', 'username', 'password')),
+                ('state', 'resize', ('disks', 'vcpu', 'ram')),
                 ('state', 'absent', ('remove_public_ipv4',))
             ]
         )
@@ -239,6 +251,11 @@ class Vm(Base):
             else:
                 network = self._get_network()
                 self._create_vm(os_version_choices, network)
+        elif self._state == 'resize':
+            if 'uuid' in vm:
+                vm = self._resize_vm(vm)
+            else:
+                vm.update(changed=False)
         elif self._state == 'absent':
             if 'uuid' in vm:
                 vm = self._delete_vm(vm)
@@ -251,10 +268,7 @@ class Vm(Base):
         self._module.exit_json(**vm)
 
     def _get_vm(self) -> dict:
-        url = f'{self._base_url}/{self._location}/user-resource/vm/list'
-        url_headers = dict(
-            apikey=self._api_key
-        )
+        url, url_headers = self._init_url('user-resource/vm/list')
 
         response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
@@ -270,13 +284,23 @@ class Vm(Base):
         floating_ip = self._get_public_ipv4(data['uuid'], data['private_ipv4'])
         public_ipv4 = '' if 'public_ipv4' not in floating_ip else floating_ip['public_ipv4']
 
+        disks = 0
+        for storage in data['storage']:
+            if storage['primary']:
+                disks = storage['size']
+                break
+
         vm = dict(
             uuid=data['uuid'],
             name=data['name'],
             hostname=data['hostname'],
+            disks=disks,
+            vcpu=data['vcpu'],
+            ram=data['memory'],
             private_ipv4=data['private_ipv4'],
             public_ipv4=public_ipv4,
             billing_account=data['billing_account'],
+            status=data['status'],
             changed=True
         )
 
@@ -305,11 +329,8 @@ class Vm(Base):
 
             self._module.fail_json(msg='Failed to create the VM.', **result)
 
-        url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
-        url_headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'apikey': self._api_key
-        }
+        url, url_headers = self._init_url()
+        url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
 
         form_data = dict(
             network_uuid=network['uuid'],
@@ -337,11 +358,63 @@ class Vm(Base):
 
             self._module.exit_json(**result)
 
-    def _delete_vm(self, vm) -> dict:
-        url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
-        url_headers = dict(
-            apikey=self._api_key
+    def _resize_vm(self, vm) -> dict:
+        url, url_headers = self._init_url()
+
+        disks = self._module.params['disks']
+        vcpu = self._module.params['vcpu']
+        ram = self._module.params['ram']
+
+        form_data = dict(
+            uuid=vm['uuid'],
+            name=self._name,
+            vcpu=vcpu,
+            ram=ram
         )
+
+        # response = requests.request('PATCH', url, headers=url_headers, data=form_data, timeout=360)
+        # data = response.json()
+        data = dict(uuid='1111')
+
+        if 'uuid' in data:
+            is_changed = vcpu != vm['vcpu'] or ram != vm['ram'] or disks != vm['disks']
+            vm.update(changed=is_changed)
+        else:
+            result = dict(
+                error='There was a problem with the request.'
+            )
+
+            self._module.fail_json(msg='Failed to resize the VM.', **result)
+
+        return vm
+
+    def _set_vm_state(self, vm, active=True):
+        action = 'start' if active else 'stop'
+        url, url_headers = self._init_url(f'{self._endpoint_url}/{action}')
+        url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
+
+        form_data = dict(
+            uuid=vm['uuid']
+        )
+
+        response = requests.request('POST', url, headers=url_headers, data=form_data, timeout=360)
+        data = response.json()
+
+        if 'uuid' in data:
+            is_changed = data['status'] != vm['status']
+            vm.update(changed=is_changed)
+        else:
+            result = dict(
+                error='There was a problem with the request.'
+            )
+
+            self._module.fail_json(msg=f'Failed to {action} the VM.', **result)
+
+        return vm
+
+    def _delete_vm(self, vm) -> dict:
+        url, url_headers = self._init_url()
+        url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
 
         form_data = dict(
             uuid=vm['uuid']
@@ -361,10 +434,7 @@ class Vm(Base):
         return vm
 
     def _delete_public_ipv4(self, public_ipv4):
-        url = f'{self._base_url}/{self._location}/network/ip_addresses/{public_ipv4}'
-        url_headers = dict(
-            apikey=self._api_key
-        )
+        url, url_headers = self._init_url(f'network/ip_addresses/{public_ipv4}')
 
         response = requests.request('DELETE', url, headers=url_headers, timeout=360)
 

@@ -33,11 +33,17 @@ class Base(object):
                 results=[]
             )
 
-    def _get_existing_network(self, name) -> dict:
-        url = f'{self._base_url}/{self._location}/network/networks'
+    def _init_url(self, endpoint_url=None) -> tuple[str, dict]:
+        endpoint_url_result = self._endpoint_url if endpoint_url is None else endpoint_url
+        url = f'{self._base_url}/{self._location}/{endpoint_url_result}'
         url_headers = dict(
             apikey=self._api_key
         )
+
+        return url, url_headers
+
+    def _get_existing_network(self, name) -> dict:
+        url, url_headers = self._init_url('network/networks')
 
         global requests
         requests = self._ensure_requests()
@@ -59,10 +65,7 @@ class Base(object):
         return dict()
 
     def _get_public_ipv4(self, vm_uuid=None, private_ipv4=None) -> dict:
-        url = f'{self._base_url}/{self._location}/network/ip_addresses'
-        url_headers = dict(
-            apikey=self._api_key
-        )
+        url, url_headers = self._init_url('network/ip_addresses')
 
         global requests
         requests = self._ensure_requests()
