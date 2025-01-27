@@ -338,28 +338,25 @@ class Vm(Base):
             self._module.exit_json(**result)
 
     def _delete_vm(self, vm) -> dict:
-        if 'uuid' in vm:
-            url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
-            url_headers = dict(
-                apikey=self._api_key
-            )
+        url = f'{self._base_url}/{self._location}/{self._endpoint_url}'
+        url_headers = dict(
+            apikey=self._api_key
+        )
 
-            form_data = dict(
-                uuid=vm['uuid']
-            )
+        form_data = dict(
+            uuid=vm['uuid']
+        )
 
-            response = requests.request('DELETE', url, headers=url_headers, data=form_data, timeout=360)
+        response = requests.request('DELETE', url, headers=url_headers, data=form_data, timeout=360)
 
-            if response.status_code == 200:
-                vm.update(changed=True)
-            else:
-                result = dict(
-                    error='There was a problem with the request.'
-                )
-
-                self._module.fail_json(msg='Failed to delete the VM.', **result)
+        if response.status_code == 200:
+            vm.update(changed=True)
         else:
-            vm.update(changed=False)
+            result = dict(
+                error='There was a problem with the request.'
+            )
+
+            self._module.fail_json(msg='Failed to delete the VM.', **result)
 
         return vm
 
