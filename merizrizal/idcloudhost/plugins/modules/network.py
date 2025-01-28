@@ -149,7 +149,7 @@ class Network(Base):
                     network.update(changed=True)
                 else:
                     result = dict(
-                        error='There was a problem with the request.'
+                        error=response.json()
                     )
 
                     module.fail_json(msg='Failed to delete the VPC network.', **result)

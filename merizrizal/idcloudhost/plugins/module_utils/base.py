@@ -17,6 +17,9 @@ class Base(object):
 
         self._module: AnsibleModule = None
 
+        global requests
+        requests = self._ensure_requests()
+
     def _ensure_requests(self):
         try:
             import requests
@@ -45,8 +48,6 @@ class Base(object):
     def _get_existing_network(self, name) -> dict:
         url, url_headers = self._init_url('network/networks')
 
-        global requests
-        requests = self._ensure_requests()
         response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
 
@@ -67,8 +68,6 @@ class Base(object):
     def _get_public_ipv4(self, vm_uuid=None, private_ipv4=None) -> dict:
         url, url_headers = self._init_url('network/ip_addresses')
 
-        global requests
-        requests = self._ensure_requests()
         response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
 
