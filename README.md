@@ -67,6 +67,30 @@ Example of using the VM module.
         # Since the default value of state is set to present, we may exclude the state below
         state: present
 
+    - name: Resize VM
+      merizrizal.idcloudhost.vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        name: "{{ your_desired_vm_name }}"
+        disks: 40
+        vcpu: 4
+        ram: 4096
+        state: resize
+
+    - name: Power on the VM
+      merizrizal.idcloudhost.vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        name: "{{ your_desired_vm_name }}"
+        state: active
+
+    - name: Power off the VM
+      merizrizal.idcloudhost.vm:
+        api_key: "{{ your_api_key }}"
+        location: jkt02
+        name: "{{ your_desired_vm_name }}"
+        state: inactive
+
     - name: Delete VM resource
       merizrizal.idcloudhost.vm:
         api_key: "{{ your_api_key }}"

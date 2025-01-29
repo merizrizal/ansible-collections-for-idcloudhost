@@ -119,10 +119,7 @@ class Network(Base):
             if 'uuid' in network:
                 network.update(changed=False)
             else:
-                url = f'{self._base_url}/{self._location}/{self._endpoint_url}?name={self._name}'
-                url_headers = dict(
-                    apikey=self._api_key
-                )
+                url, url_headers = self._init_url(f'{self._endpoint_url}?name={self._name}')
 
                 response = requests.request('POST', url, headers=url_headers, timeout=360)
                 data = response.json()
@@ -144,10 +141,7 @@ class Network(Base):
         elif self._state == 'absent':
             if 'uuid' in network:
                 uuid = network['uuid']
-                url = f'{self._base_url}/{self._location}/{self._endpoint_url}/{uuid}'
-                url_headers = dict(
-                    apikey=self._api_key
-                )
+                url, url_headers = self._init_url(f'{self._endpoint_url}/{uuid}')
 
                 response = requests.request('DELETE', url, headers=url_headers, timeout=360)
 
@@ -155,7 +149,7 @@ class Network(Base):
                     network.update(changed=True)
                 else:
                     result = dict(
-                        error='There was a problem with the request.'
+                        error=response.json()
                     )
 
                     module.fail_json(msg='Failed to delete the VPC network.', **result)
