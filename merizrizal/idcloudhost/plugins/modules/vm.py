@@ -493,7 +493,7 @@ class Vm(Base):
 
         return vm
 
-    def _activate_vm(self, vm, active=True):
+    def _activate_vm(self, vm, active=True) -> dict:
         action = 'start' if active else 'stop'
         url, url_headers = self._init_url(f'{self._endpoint_url}/{action}')
         url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
