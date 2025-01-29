@@ -99,7 +99,7 @@ options:
         description:
             - Indicates the desired VM state.
             - If present, it will be created.
-            - If resize, it will resize disks, VCPU and RAM.
+            - If resize, it will be resized the disks, VCPU and RAM.
             - If active, it will be powered on.
             - If inactive, it will be powered off.
             - If absent, it will be deleted.
