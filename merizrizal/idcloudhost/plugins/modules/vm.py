@@ -100,10 +100,12 @@ options:
             - Indicates the desired VM state.
             - If present, it will be created.
             - If resize, it will resize disks, VCPU and RAM.
+            - If active, it will be powered on.
+            - If inactive, it will be powered off.
             - If absent, it will be deleted.
         default: present
         type: str
-        choices: [ present, resize, absent ]
+        choices: [ absent, active, inactive, present, resize ]
 
 author:
     - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
@@ -143,6 +145,20 @@ EXAMPLES = r'''
     vcpu: 4
     ram: 3072
     state: resize
+
+- name: Power on the VM
+  merizrizal.idcloudhost.vm:
+    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    location: jkt01
+    name: my_ubuntu_vm01
+    state: active
+
+- name: Power off the VM
+  merizrizal.idcloudhost.vm:
+    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    location: jkt01
+    name: my_ubuntu_vm01
+    state: inactive
 '''
 
 RETURN = r'''
@@ -244,7 +260,7 @@ class Vm(Base):
             username=dict(type='str'),
             password=dict(type='str', no_log=True),
             remove_public_ipv4=dict(type='bool', default=None),
-            state=dict(type='str', default='present', choices=['absent', 'present', 'resize'])
+            state=dict(type='str', default='present', choices=['absent', 'active', 'inactive', 'present', 'resize'])
         )
 
         self._module = AnsibleModule(
@@ -274,6 +290,10 @@ class Vm(Base):
         elif self._state == 'resize':
             if 'uuid' in vm:
                 vm = self._resize_vm(vm)
+        elif self._state == 'active':
+            vm = self._activate_vm(vm)
+        elif self._state == 'inactive':
+            vm = self._activate_vm(vm, False)
         elif self._state == 'absent':
             if 'uuid' in vm:
                 vm = self._delete_vm(vm)
@@ -284,7 +304,7 @@ class Vm(Base):
         self._module.exit_json(**vm)
 
     def _get_vm(self) -> dict:
-        url, url_headers = self._init_url('user-resource/vm/list')
+        url, url_headers = self._init_url(f'{self._endpoint_url}/list')
 
         response = requests.request('GET', url, headers=url_headers, timeout=360)
         data = response.json()
@@ -416,6 +436,7 @@ class Vm(Base):
         is_changed = vcpu != current_vm['vcpu'] or ram != current_vm['ram']
         if is_changed:
             url, url_headers = self._init_url()
+            url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
 
             form_data = dict(
                 uuid=current_vm['uuid'],
@@ -447,6 +468,7 @@ class Vm(Base):
         is_changed = disks != current_vm['disks']
         if is_changed:
             url, url_headers = self._init_url(f'{self._endpoint_url}/storage')
+            url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
 
             form_data = dict(
                 uuid=current_vm['uuid'],
