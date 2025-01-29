@@ -531,7 +531,7 @@ class Vm(Base):
             vm.update(changed=True)
         else:
             result = dict(
-                error='There was a problem with the request.'
+                error=response.json()
             )
 
             self._module.fail_json(msg='Failed to delete the VM.', **result)
