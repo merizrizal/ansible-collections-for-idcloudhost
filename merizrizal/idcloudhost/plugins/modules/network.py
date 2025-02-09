@@ -93,6 +93,9 @@ class Network(Base):
         self._endpoint_url = 'network/network'
 
     def main(self):
+        global requests
+        requests = self._ensure_requests()
+
         argument_spec = dict(
             api_key=dict(type='str', required=True, no_log=True),
             name=dict(type='str', required=True),
@@ -104,9 +107,6 @@ class Network(Base):
             argument_spec=argument_spec,
             supports_check_mode=True,
         )
-
-        global requests
-        requests = self._ensure_requests()
 
         self._name = module.params['name']
         self._api_key = module.params['api_key']

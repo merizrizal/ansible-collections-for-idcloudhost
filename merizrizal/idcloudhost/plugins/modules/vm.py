@@ -280,7 +280,7 @@ class Vm(Base):
         self._name = self._module.params['name']
         self._state = self._module.params['state']
 
-        vm = self._get_vm()
+        vm = self._get_vm(name=self._name)
         if self._state == 'present':
             if 'uuid' in vm:
                 vm.update(changed=False)
@@ -302,48 +302,6 @@ class Vm(Base):
                     self._delete_public_ipv4(vm['public_ipv4'])
 
         self._module.exit_json(**vm)
-
-    def _get_vm(self) -> dict:
-        url, url_headers = self._init_url(f'{self._endpoint_url}/list')
-
-        response = requests.request('GET', url, headers=url_headers, timeout=360)
-        data = response.json()
-
-        if isinstance(data, list) and len(data) > 0:
-            for value in data:
-                if value['name'] == self._name:
-                    return self._construct_vm_data(value)
-
-        return dict()
-
-    def _construct_vm_data(self, data) -> dict:
-        floating_ip = self._get_public_ipv4(data['uuid'], data['private_ipv4'])
-        public_ipv4 = '' if 'public_ipv4' not in floating_ip else floating_ip['public_ipv4']
-
-        disks = 0
-        disk_uuid = ''
-        for storage in data['storage']:
-            if storage['primary']:
-                disks = storage['size']
-                disk_uuid = storage['uuid']
-                break
-
-        vm = dict(
-            uuid=data['uuid'],
-            name=data['name'],
-            hostname=data['hostname'],
-            disks=disks,
-            disk_uuid=disk_uuid,
-            vcpu=data['vcpu'],
-            ram=data['memory'],
-            private_ipv4=data['private_ipv4'],
-            public_ipv4=public_ipv4,
-            billing_account=data['billing_account'],
-            status=data['status'],
-            changed=False
-        )
-
-        return vm
 
     def _get_network(self) -> dict:
         network = self._get_existing_network(self._module.params['network_name'])
@@ -404,7 +362,8 @@ class Vm(Base):
         vcpu = self._module.params['vcpu']
         ram = self._module.params['ram']
 
-        if disks != current_vm['disks'] or vcpu != current_vm['vcpu'] or ram != current_vm['ram']:
+        is_changed = disks != current_vm['disks'] or vcpu != current_vm['vcpu'] or ram != current_vm['ram']
+        if is_changed:
             is_success = True
             fail_result = dict()
 
@@ -421,6 +380,8 @@ class Vm(Base):
                 is_success = False
 
             self._activate_vm(current_vm)
+
+            vm.update(changed=is_changed)
 
             if not is_success:
                 self._module.fail_json(fail_result)
@@ -450,7 +411,6 @@ class Vm(Base):
 
             if 'uuid' in data:
                 vm = self._construct_vm_data(data)
-                vm.update(changed=is_changed)
             else:
                 result = dict(
                     errors=data
@@ -480,10 +440,7 @@ class Vm(Base):
             data = response.json()
 
             if 'uuid' in data:
-                vm.update(
-                    disks=data['size'],
-                    changed=is_changed
-                )
+                vm.update(disks=data['size'])
             else:
                 result = dict(
                     errors=data
@@ -537,18 +494,6 @@ class Vm(Base):
             self._module.fail_json(msg='Failed to delete the VM.', **result)
 
         return vm
-
-    def _delete_public_ipv4(self, public_ipv4):
-        url, url_headers = self._init_url(f'network/ip_addresses/{public_ipv4}')
-
-        response = requests.request('DELETE', url, headers=url_headers, timeout=360)
-
-        if response.status_code != 200:
-            result = dict(
-                error='There was a problem with the request when deleting the public IPv4 address.'
-            )
-
-            self._module.fail_json(msg='Failed to delete the VM.', **result)
 
 
 if __name__ == '__main__':
