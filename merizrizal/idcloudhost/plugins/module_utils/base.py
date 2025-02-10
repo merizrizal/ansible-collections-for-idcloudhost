@@ -89,7 +89,7 @@ class Base(object):
 
                     return result
 
-            return dict()
+        return dict()
 
     def _delete_public_ipv4(self, public_ipv4):
         url, url_headers = self._init_url(f'network/ip_addresses/{public_ipv4}')

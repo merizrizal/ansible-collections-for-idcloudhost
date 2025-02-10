@@ -34,6 +34,7 @@ options:
     vm_name:
         description: The name of the VM to which this IP will be assigned.
         required: false
+        default: null
         type: str
     state:
         description:
@@ -91,7 +92,7 @@ name:
     description: Name of the managed floating IP.
     type: str
     returned: success
-ipv4_address:
+public_ipv4:
     description: Public IPv4 address of the managed floating IP.
     type: str
     returned: success
@@ -99,9 +100,17 @@ vm_name:
     description: The name of the VM to which this IP is assigned.
     type: str
     returned: success
+assigned_to_vm_uuid:
+    description: The uuid of the VM to which this IP is assigned.
+    type: str
+    returned: success
 private_ipv4_address:
     description: The address of private IPv4 to which this IP is assigned.
     type: str
+    returned: success
+enabled:
+    description: The status of the floating IP.
+    type: bool
     returned: success
 '''
 
@@ -125,7 +134,7 @@ class FloatingIp(Base):
             api_key=dict(type='str', required=True, no_log=True),
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
             name=dict(type='str', required=True),
-            vm_name=dict(type='str'),
+            vm_name=dict(type='str', default=None),
             state=dict(type='str', default='present', choices=['absent', 'present', 'unassigned'])
         )
 
@@ -138,14 +147,24 @@ class FloatingIp(Base):
         self._api_key = self._module.params['api_key']
         self._location = self._module.params['location']
         self._state = self._module.params['state']
+        vm_name = self._module.params['vm_name']
 
         floating_ip = self._get_public_ipv4(name=self._name)
 
+        vm = dict()
+        if vm_name is not None:
+            vm = self._get_vm(name=vm_name)
+            if 'uuid' not in vm:
+                self._module.fail_json(msg='Failed to create the floating IP. The VM name is provided, but no VM was found.')
+
         if self._state == 'present':
             if 'uuid' in floating_ip:
-                floating_ip.update(changed=False)
+                floating_ip.update(
+                    vm_name='' if vm_name is None else vm_name,
+                    changed=False
+                )
             else:
-                self._create_floating_ip()
+                self._create_floating_ip(vm)
         elif self._state == 'absent':
             if 'uuid' in floating_ip:
                 self._delete_public_ipv4(floating_ip['public_ipv4'])
@@ -155,7 +174,7 @@ class FloatingIp(Base):
 
         self._module.exit_json(**floating_ip)
 
-    def _create_floating_ip(self):
+    def _create_floating_ip(self, vm):
         url, url_headers = self._init_url(self._endpoint_url)
         url_headers.update({'Content-Type': 'application/json'})
 
@@ -176,13 +195,47 @@ class FloatingIp(Base):
             result = dict(
                 uuid=data['uuid'],
                 name=data['name'],
-                ipv4_address=data['address'],
+                public_ipv4=data['address'],
                 vm_name='',
+                assigned_to_vm_uuid='',
                 private_ipv4_address='',
+                enabled=data['enabled'],
                 changed=True
             )
 
+            floating_ip = dict()
+            if 'uuid' in vm:
+                floating_ip = self._assign_to_vm(data['address'], vm['uuid'])
+
+            if 'uuid' in floating_ip:
+                result.update(
+                    vm_name=vm['name'],
+                    assigned_to_vm_uuid=floating_ip['assigned_to'],
+                    private_ipv4_address=floating_ip['assigned_to_private_ip']
+                )
+            elif 'msg' in floating_ip:
+                self._module.fail_json(**floating_ip)
+
             self._module.exit_json(**result)
+
+    def _assign_to_vm(self, ipv4_address, vm_uuid) -> dict:
+        url, url_headers = self._init_url(f'{self._endpoint_url}/{ipv4_address}/assign')
+        url_headers.update({'Content-Type': 'application/json'})
+
+        form_data = dict(
+            vm_uuid=vm_uuid
+        )
+
+        response = requests.request('POST', url, headers=url_headers, json=form_data, timeout=360)
+        data = response.json()
+
+        if 'uuid' in data:
+            return data
+
+        return dict(
+            msg='Failed to assign the floating IP into selected VM.',
+            error=data
+        )
 
 
 if __name__ == '__main__':
