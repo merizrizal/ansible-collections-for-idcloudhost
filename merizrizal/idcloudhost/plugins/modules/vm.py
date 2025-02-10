@@ -290,6 +290,8 @@ class Vm(Base):
         elif self._state == 'resize':
             if 'uuid' in vm:
                 vm = self._resize_vm(vm)
+            else:
+                self._module.fail_json(msg='Failed to create the VM. No VM was found')
         elif self._state == 'active':
             vm = self._activate_vm(vm)
         elif self._state == 'inactive':
@@ -298,7 +300,7 @@ class Vm(Base):
             if 'uuid' in vm:
                 vm = self._delete_vm(vm)
 
-                if self._module.params['remove_public_ipv4']:
+                if self._module.params['remove_public_ipv4'] and vm['public_ipv4'] != '':
                     self._delete_public_ipv4(vm['public_ipv4'])
 
         self._module.exit_json(**vm)

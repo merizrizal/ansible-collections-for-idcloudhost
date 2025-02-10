@@ -44,7 +44,7 @@ options:
             - If unassigned, it will be unassigned from specific VM.
         default: present
         type: str
-        choices: [ present, absent, unassigned ]
+        choices: [ present, absent, unassign ]
 
 author:
     - Mei Rizal (@merizrizal) <meriz.rizal@gmail.com>
@@ -135,7 +135,7 @@ class FloatingIp(Base):
             location=dict(type='str', required=True, choices=['jkt01', 'jkt02', 'jkt03', 'sgp01']),
             name=dict(type='str', required=True),
             vm_name=dict(type='str', default=None),
-            state=dict(type='str', default='present', choices=['absent', 'present', 'unassigned'])
+            state=dict(type='str', default='present', choices=['absent', 'present', 'unassign'])
         )
 
         self._module = AnsibleModule(
@@ -163,12 +163,32 @@ class FloatingIp(Base):
                     vm_name='' if vm_name is None else vm_name,
                     changed=False
                 )
+
+                if 'uuid' in vm and floating_ip['assigned_to_vm_uuid'] == '':
+                    data_response = self._assign_to_vm(floating_ip['public_ipv4'], vm['uuid'])
+                    data_response = self._update_assigned_floating_ip(data_response, vm['name'])
+
+                    floating_ip.update(
+                        **data_response,
+                        changed=True
+                    )
             else:
                 self._create_floating_ip(vm)
         elif self._state == 'absent':
             if 'uuid' in floating_ip:
                 self._delete_public_ipv4(floating_ip['public_ipv4'])
                 floating_ip.update(changed=True)
+            else:
+                floating_ip.update(changed=False)
+        elif self._state == 'unassign':
+            if 'uuid' in floating_ip:
+                data_response = self._unassign_from_vm(floating_ip['public_ipv4'])
+                data_response = self._update_assigned_floating_ip(data_response, '')
+
+                floating_ip.update(
+                    **data_response,
+                    changed=floating_ip['assigned_to_vm_uuid'] != ''
+                )
             else:
                 floating_ip.update(changed=False)
 
@@ -203,18 +223,12 @@ class FloatingIp(Base):
                 changed=True
             )
 
-            floating_ip = dict()
+            data_response = dict()
             if 'uuid' in vm:
-                floating_ip = self._assign_to_vm(data['address'], vm['uuid'])
+                data_response = self._assign_to_vm(data['address'], vm['uuid'])
 
-            if 'uuid' in floating_ip:
-                result.update(
-                    vm_name=vm['name'],
-                    assigned_to_vm_uuid=floating_ip['assigned_to'],
-                    private_ipv4_address=floating_ip['assigned_to_private_ip']
-                )
-            elif 'msg' in floating_ip:
-                self._module.fail_json(**floating_ip)
+            data_response = self._update_assigned_floating_ip(data_response, vm['name'])
+            result.update(**data_response)
 
             self._module.exit_json(**result)
 
@@ -236,6 +250,40 @@ class FloatingIp(Base):
             msg='Failed to assign the floating IP into selected VM.',
             error=data
         )
+
+    def _unassign_from_vm(self, ipv4_address) -> dict:
+        url, url_headers = self._init_url(f'{self._endpoint_url}/{ipv4_address}/unassign')
+
+        response = requests.request('POST', url, headers=url_headers, timeout=360)
+        data = response.json()
+
+        if 'uuid' in data:
+            result = dict(**data)
+            result.update(
+                assigned_to='',
+                assigned_to_private_ip=''
+            )
+
+            return result
+
+        return dict(
+            msg='Failed to assign the floating IP into selected VM.',
+            error=data
+        )
+
+    def _update_assigned_floating_ip(self, floating_ip, vm_name) -> dict:
+        result = dict()
+
+        if 'uuid' in floating_ip:
+            result.update(
+                vm_name=vm_name,
+                assigned_to_vm_uuid=floating_ip['assigned_to'],
+                private_ipv4_address=floating_ip['assigned_to_private_ip']
+            )
+        elif 'msg' in floating_ip:
+            self._module.fail_json(**floating_ip)
+
+        return result
 
 
 if __name__ == '__main__':
