@@ -23,7 +23,7 @@ options:
         required: true
         type: str
     location:
-        description: The location name of the network to which this network is assigned.
+        description: The location name of the network to which this floating IP is assigned.
         required: true
         type: str
         choices: [ jkt01, jkt02, jkt03, sgp01 ]
@@ -247,7 +247,7 @@ class FloatingIp(Base):
             return data
 
         return dict(
-            msg='Failed to assign the floating IP into selected VM.',
+            msg='Failed to assign the floating IP into the selected VM.',
             error=data
         )
 
@@ -267,7 +267,7 @@ class FloatingIp(Base):
             return result
 
         return dict(
-            msg='Failed to assign the floating IP into selected VM.',
+            msg='Failed to unassign the floating IP from the selected VM.',
             error=data
         )
 
