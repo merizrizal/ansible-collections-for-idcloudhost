@@ -47,7 +47,7 @@ author:
 EXAMPLES = r'''
 - name: Create new VPC network
   merizrizal.idcloudhost.network:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     name: my_vpc_network_01
     location: jkt01
     # Since the default value of state is set to present, we may exclude the state below
@@ -55,7 +55,7 @@ EXAMPLES = r'''
 
 - name: Delete VPC network
   merizrizal.idcloudhost.network:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     name: my_vpc_network_01
     location: jkt01
     state: absent

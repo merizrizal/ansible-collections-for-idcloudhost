@@ -114,7 +114,7 @@ author:
 EXAMPLES = r'''
 - name: Create new VM
   merizrizal.idcloudhost.vm:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     network_name: my_network_jkt01
     name: my_ubuntu_vm01
@@ -130,7 +130,7 @@ EXAMPLES = r'''
 
 - name: Delete VM
   merizrizal.idcloudhost.vm:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_ubuntu_vm01
     remove_public_ipv4: true
@@ -138,7 +138,7 @@ EXAMPLES = r'''
 
 - name: Resize VM
   merizrizal.idcloudhost.vm:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_ubuntu_vm01
     disks: 40
@@ -148,14 +148,14 @@ EXAMPLES = r'''
 
 - name: Power on the VM
   merizrizal.idcloudhost.vm:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_ubuntu_vm01
     state: active
 
 - name: Power off the VM
   merizrizal.idcloudhost.vm:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_ubuntu_vm01
     state: inactive

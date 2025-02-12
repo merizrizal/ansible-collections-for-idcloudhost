@@ -53,7 +53,7 @@ author:
 EXAMPLES = r'''
 - name: Create new floating IP only
   merizrizal.idcloudhost.floating_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_floating_ip_addr01
     # Since the default value of state is set to present, we may exclude the state below
@@ -61,7 +61,7 @@ EXAMPLES = r'''
 
 - name: Create new floating IP and assign to specific VM
   merizrizal.idcloudhost.floating_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_floating_ip_addr01
     vm_name: my_ubuntu_vm01
@@ -70,14 +70,14 @@ EXAMPLES = r'''
 
 - name: Unassign floating IP
   merizrizal.idcloudhost.floating_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_floating_ip_addr01
     state: unassign
 
 - name: Delete floating IP
   merizrizal.idcloudhost.floating_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     name: my_floating_ip_addr01
     state: absent

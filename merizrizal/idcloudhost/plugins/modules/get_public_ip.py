@@ -43,13 +43,13 @@ author:
 EXAMPLES = r'''
 - name: Get public IPv4 address from selected private_ipv4
   merizrizal.idcloudhost.get_public_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     private_ipv4: 10.51.111.211
 
 - name: Get public IPv4 address from selected vm_uuid
   merizrizal.idcloudhost.get_public_ip:
-    api_key: 2bnQkD6yOb7OkSwVCBXJSg1AHpfd99oY
+    api_key: "{{ your_api_key }}"
     location: jkt01
     vm_uuid: 88e5a11b-9c89-4986-99c7-90d43499317c
 '''
