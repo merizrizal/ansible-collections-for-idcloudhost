@@ -47,7 +47,7 @@ options:
         description:
             - Indicates the desired block storage state.
             - If present, it will be created and attached to the selected VM.
-            - If absent, it will be detached and deleted.
+            - If absent, it will be detached and deleted by selecting the disk name which is available on the VM.
         default: present
         type: str
         choices: [ present, absent ]
@@ -89,7 +89,7 @@ size:
     type: int
     returned: success
 vm_name:
-    description: Name of the VM to which this block storage is attached..
+    description: Name of the VM to which this block storage is attached.
     type: str
     returned: success
 '''
