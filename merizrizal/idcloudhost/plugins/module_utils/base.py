@@ -103,7 +103,7 @@ class Base(object):
 
             self._module.fail_json(msg='Failed to delete the VM.', **result)
 
-    def _get_vm(self, uuid=None, name=None, include_public_ipv4=True) -> dict:
+    def _get_vm(self, uuid=None, name=None, include_public_ipv4=True, include_storage=False) -> dict:
         url, url_headers = self._init_url('user-resource/vm/list')
 
         response = requests.request('GET', url, headers=url_headers, timeout=360)
@@ -112,11 +112,11 @@ class Base(object):
         if isinstance(data, list) and len(data) > 0:
             for value in data:
                 if value['uuid'] == uuid or value['name'] == name:
-                    return self._construct_vm_data(value, include_public_ipv4)
+                    return self._construct_vm_data(value, include_public_ipv4, include_storage)
 
         return dict()
 
-    def _construct_vm_data(self, data, include_public_ipv4=True) -> dict:
+    def _construct_vm_data(self, data, include_public_ipv4=True, include_storage=False) -> dict:
         floating_ip = dict()
         if include_public_ipv4:
             floating_ip = self._get_public_ipv4(data['uuid'], data['private_ipv4'])
@@ -145,5 +145,8 @@ class Base(object):
             status=data['status'],
             changed=False
         )
+
+        if include_storage:
+            vm.update(storage_list=data['storage'])
 
         return vm

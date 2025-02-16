@@ -108,9 +108,9 @@ class Network(Base):
             supports_check_mode=True,
         )
 
-        self._name = module.params['name']
         self._api_key = module.params['api_key']
         self._location = module.params['location']
+        self._name = module.params['name']
         self._state = module.params['state']
 
         network = self._get_existing_network(self._name)
