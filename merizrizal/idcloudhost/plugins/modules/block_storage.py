@@ -183,8 +183,9 @@ class BlockStorage(Base):
         url, url_headers = self._init_url()
         url_headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
 
+        disk_uuid = disk['uuid']
         form_data = dict(
-            storage_uuid=disk['uuid'],
+            storage_uuid=disk_uuid,
             uuid=vm['uuid']
         )
 
@@ -198,7 +199,7 @@ class BlockStorage(Base):
 
             self._module.fail_json(msg='Failed to delete the block storage.', **result)
         else:
-            url, url_headers = self._init_url(f'storage/disks/{disk['uuid']}')
+            url, url_headers = self._init_url(f'storage/disks/{disk_uuid}')
             response = requests.request('DELETE', url, headers=url_headers, data=form_data, timeout=360)
             if response.status_code != 204:
                 result = dict(
