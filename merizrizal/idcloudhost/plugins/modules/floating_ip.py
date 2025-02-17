@@ -33,7 +33,6 @@ options:
         type: str
     vm_name:
         description: The name of the VM to which this IP will be assigned.
-        required: false
         default: null
         type: str
     state:
@@ -143,9 +142,9 @@ class FloatingIp(Base):
             supports_check_mode=True,
         )
 
-        self._name = self._module.params['name']
         self._api_key = self._module.params['api_key']
         self._location = self._module.params['location']
+        self._name = self._module.params['name']
         self._state = self._module.params['state']
         vm_name = self._module.params['vm_name']
 
@@ -195,7 +194,7 @@ class FloatingIp(Base):
         self._module.exit_json(**floating_ip)
 
     def _create_floating_ip(self, vm):
-        url, url_headers = self._init_url(self._endpoint_url)
+        url, url_headers = self._init_url()
         url_headers.update({'Content-Type': 'application/json'})
 
         form_data = dict(
