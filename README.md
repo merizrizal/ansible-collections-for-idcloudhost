@@ -3,7 +3,7 @@
 ### Requirements:
 - Install `yq` from https://github.com/mikefarah/yq
 
-Do `make install` for installing into ansible collections directory.
+Do `source envrc` then `make install` for installing into ansible collections directory.
 
 
 ### How to implement it
