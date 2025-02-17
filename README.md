@@ -100,3 +100,7 @@ Example of using the VM module.
         state: absent
 ```
 To see the module documentation, run `ansible-doc merizrizal.idcloudhost.vm`
+
+Other module:
+- `ansible-doc merizrizal.idcloudhost.floating_ip`
+- `ansible-doc merizrizal.idcloudhost.block_storage`
