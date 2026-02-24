@@ -1,14 +1,24 @@
-## Repository for Ansible Collection - merizrizal.idcloudhost
+# Ansible Collection - merizrizal.idcloudhost
 
-### Requirements:
-- Install `yq` from https://github.com/mikefarah/yq
+An Ansible collection for automating IDCloudHost resources such as VPC networks, VMs, floating IPs, and block storage.
 
-Do `source envrc` then `make install` for installing into ansible collections directory.
+**Collection path:** `merizrizal/idcloudhost`
 
+## Requirements
+- Ansible `>=2.15.0` (from `merizrizal/idcloudhost/meta/runtime.yml`)
+- Python `requests` module on the controller
+- `yq` for the `make install` target
+- An IDCloudHost API key
 
-### How to implement it
-Write the inventory.yml. For example:
+## Install (local build)
+```bash
+source envrc
+make install
 ```
+
+## Quickstart
+### Inventory
+```yaml
 ---
 target:
   children:
@@ -20,35 +30,23 @@ target:
           ansible_httpapi_validate_certs: true
 ```
 
-Then write the playbook.yml file.
-
-Example of using the Network module.
-```
----
-- name: ID Cloud Host Setup
+### Playbook examples
+Create a VPC network:
+```yaml
+- name: Create VPC network
   hosts: idch
   tasks:
-    - name: Create network VPC resource
+    - name: Create network
       merizrizal.idcloudhost.network:
         api_key: "{{ your_api_key }}"
         name: "{{ your_desired_network_name }}"
         location: jkt02
-        # Since the default value of state is set to present, we may exclude the state below
         state: present
-
-    - name: Delete network VPC resource
-      merizrizal.idcloudhost.network:
-        api_key: "{{ your_api_key }}"
-        name: "{{ your_desired_network_name }}"
-        location: jkt02
-        state: absent
 ```
-To see the module documentation, run `ansible-doc merizrizal.idcloudhost.network`
 
-Example of using the VM module.
-```
----
-- name: ID Cloud Host Setup
+Create a VM:
+```yaml
+- name: Create VM
   hosts: idch
   tasks:
     - name: Create VM resource
@@ -64,43 +62,16 @@ Example of using the VM module.
         ram: 2048
         username: admin
         password: My4adminpass
-        # Since the default value of state is set to present, we may exclude the state below
         state: present
-
-    - name: Resize VM
-      merizrizal.idcloudhost.vm:
-        api_key: "{{ your_api_key }}"
-        location: jkt02
-        name: "{{ your_desired_vm_name }}"
-        disks: 40
-        vcpu: 4
-        ram: 4096
-        state: resize
-
-    - name: Power on the VM
-      merizrizal.idcloudhost.vm:
-        api_key: "{{ your_api_key }}"
-        location: jkt02
-        name: "{{ your_desired_vm_name }}"
-        state: active
-
-    - name: Power off the VM
-      merizrizal.idcloudhost.vm:
-        api_key: "{{ your_api_key }}"
-        location: jkt02
-        name: "{{ your_desired_vm_name }}"
-        state: inactive
-
-    - name: Delete VM resource
-      merizrizal.idcloudhost.vm:
-        api_key: "{{ your_api_key }}"
-        location: jkt02
-        name: "{{ your_desired_vm_name }}"
-        remove_public_ipv4: false
-        state: absent
 ```
-To see the module documentation, run `ansible-doc merizrizal.idcloudhost.vm`
 
-Other module:
+## Module reference
+Use `ansible-doc` for the full module documentation:
+- `ansible-doc merizrizal.idcloudhost.network`
+- `ansible-doc merizrizal.idcloudhost.vm`
 - `ansible-doc merizrizal.idcloudhost.floating_ip`
 - `ansible-doc merizrizal.idcloudhost.block_storage`
+- `ansible-doc merizrizal.idcloudhost.get_public_ip`
+
+## Documentation
+Additional documentation is in the `docs/` directory.
